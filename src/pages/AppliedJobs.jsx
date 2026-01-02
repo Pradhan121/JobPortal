@@ -1,0 +1,139 @@
+import {
+  Box,
+  Card,
+  CardContent,
+  Container,
+  Grid,
+  Typography,
+} from "@mui/material";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+export default function AppliedJobs() {
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+
+    if (!userId) {
+      navigate("/login");
+      return;
+    }
+
+    axios
+      .get("https://generateapi.techsnack.online/api/applicants", {
+        headers: {
+          Authorization: "byqZEYiNcf0n5qCM",
+        },
+      })
+      .then((res) => {
+        const filtered = res.data.Data.filter((item) => item.userId === userId);
+        setAppliedJobs(filtered);
+      });
+  }, [navigate]);
+
+  useEffect(() => {
+    axios
+      .get("https://generateapi.techsnack.online/api/jobs", {
+        headers: {
+          Authorization: "byqZEYiNcf0n5qCM",
+        },
+      })
+      .then((res) => {
+        setJobs(res.data.Data);
+      });
+  }, []);
+
+  // 🔎 Job details finder
+  const getJobDetails = (jobId) => {
+    return jobs.find((job) => job._id === jobId);
+  };
+
+  return (
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "#020617",
+        padding: "40px",
+        marginTop: "60px",
+      }}
+    >
+      <Typography
+        sx={{
+          color: "#fff",
+          fontSize: "32px",
+          fontWeight: 700,
+          mb: 4,
+          textAlign: "center",
+        }}
+      >
+        Applied Jobs
+      </Typography>
+
+      <Container>
+        <Grid container spacing={3}>
+          {appliedJobs.length === 0 && (
+            <Typography sx={{ color: "#94a3b8", mx: "auto", mt: 4 }}>
+              No applied jobs found
+            </Typography>
+          )}
+
+          {appliedJobs.map((item) => {
+            const jobDetails = getJobDetails(item.jobId);
+
+            return (
+              <Grid size={{ lg: 4, sm: 6, md: 4, xl: 12 }} key={item._id}>
+                <Card
+                  sx={{
+                    background: "#020617",
+                    border: "1px solid #1e293b",
+                    borderRadius: "14px",
+                  }}
+                >
+                  <CardContent>
+                    <Typography
+                      sx={{
+                        color: "#fff",
+                        fontSize: "18px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {jobDetails?.title || "Job Title"}
+                    </Typography>
+
+                    <Typography sx={{ color: "#94a3b8", mb: 1 }}>
+                      {jobDetails?.company || "Company Name"}
+                    </Typography>
+
+                    <Typography sx={{ color: "#cbd5e1", fontSize: "14px" }}>
+                      Applied On: {item.appliedAt}
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        fontSize: "14px",
+                        mt: 1,
+                        fontWeight: 600,
+                        color:
+                          item.status === "accepted"
+                            ? "#22c55e"
+                            : item.status === "rejected"
+                            ? "#ef4444"
+                            : "#facc15",
+                      }}
+                    >
+                      Status: {item.status}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Container>
+    </Box>
+  );
+}
