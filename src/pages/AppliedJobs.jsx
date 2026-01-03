@@ -24,16 +24,18 @@ export default function AppliedJobs() {
     }
 
     axios
-      .get("https://generateapi.techsnack.online/api/applicants", {
+      .get("https://generateapi.techsnack.online/api/appliedJobs", {
         headers: {
           Authorization: "byqZEYiNcf0n5qCM",
         },
       })
       .then((res) => {
-        const filtered = res.data.Data.filter((item) => item.userId === userId);
+        const filtered = res.data.Data.filter(
+        (item) => String(item.userId) === String(userId)
+        )
         setAppliedJobs(filtered);
       });
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     axios
@@ -83,9 +85,8 @@ export default function AppliedJobs() {
 
           {appliedJobs.map((item) => {
             const jobDetails = getJobDetails(item.jobId);
-
             return (
-              <Grid size={{ lg: 4, sm: 6, md: 4, xl: 12 }} key={item._id}>
+              <Grid size={{ lg: 4, sm: 6, md: 4, xs: 12 }} key={item._id}>
                 <Card
                   sx={{
                     background: "#020617",

@@ -10,13 +10,21 @@ import Dashboard from "../pages/admin/Dashboard";
 import AdminLayout from "../components/admin/AdminLayout";
 import Applicants from "../pages/admin/Applicants";
 import Add_EditJob from "../pages/admin/Add_EditJob";
+import UserLayout from "../components/common/UserLayout";
 
 export default function AppRoutes() {
   return (
     <>
       <Routes>
         {/* USER ROUTES */}
-        <Route path="/" element={<Home />} />
+        <Route
+          path="/"
+          element={
+            <UserLayout>
+              <Home />
+            </UserLayout>
+          }
+        />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/jobs" element={<Jobs />} />
@@ -46,7 +54,9 @@ export default function AppRoutes() {
           path="/admin/applicants"
           element={
             <AdminRoute>
-              <Applicants />
+              <AdminLayout>
+                 <Applicants />
+              </AdminLayout>
             </AdminRoute>
           }
         />

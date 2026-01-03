@@ -2,92 +2,252 @@ import {
   AppBar,
   Box,
   Button,
-  InputAdornment,
-  TextField,
   Toolbar,
   Typography,
+  Menu,
+  MenuItem,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
-import React, { useContext } from "react";
 import { BsBriefcase } from "react-icons/bs";
 import SearchIcon from "@mui/icons-material/Search";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 
 export default function Header() {
-  const { user, logout,searchBar,setSearchBar} = useContext(AuthContext);
+  const { user, logout, searchBar, setSearchBar } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
 
   const handleLogout = () => {
     logout();
+    setAnchorEl(null)
     navigate("/");
   };
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <AppBar sx={{ background: "#0f172a" }} elevation={0}>
-        <Toolbar sx={{ minHeight: "70px", justifyContent: "space-between" }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              color: "#2563eb",
+    <AppBar sx={{ background: "#0f172a" }}>
+      <Toolbar sx={{ justifyContent: "space-between" }}>
+        {/* LOGO */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <BsBriefcase size={22} color="#2563eb" />
+          <Typography fontSize={22} fontWeight={600}>
+            JobPortal
+          </Typography>
+        </Box>
+
+        {/* SEARCH - DESKTOP ONLY */}
+        <TextField
+          size="small"
+          placeholder="Search jobs..."
+          value={searchBar}
+          onChange={(e) => setSearchBar(e.target.value)}
+          sx={{
+            display: { xs: "none", md: "block" },
+            background: "#fff",
+            borderRadius: "6px",
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+
+        {/* DESKTOP RIGHT MENU */}
+        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
+          {!user ? (
+            <>
+              <Button
+                component={NavLink}
+                to="/login"
+                variant="outlined"
+                sx={{ color: "#fff", borderColor: "#2563eb" }}
+              >
+                Login
+              </Button>
+              <Button
+                component={NavLink}
+                to="/signup"
+                variant="contained"
+                sx={{ background: "#2563eb" }}
+              >
+                Signup
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button component={NavLink} to="/"
+                sx={{
+                  color: "#e5e7eb",
+                  px: 2,
+                  borderRadius: "8px",
+
+                  "&:hover": {
+                    backgroundColor: "#1e293b",
+                  },
+
+                  "&.active": {
+                    color: "#38bdf8",
+                    backgroundColor: "#0f172a",
+                    fontWeight: 600,
+                  },
+                }}
+              >Home</Button>
+              <Button component={NavLink} to="/jobs"
+                sx={{
+                  color: "#e5e7eb",
+                  px: 2,
+                  borderRadius: "8px",
+
+                  "&:hover": {
+                    backgroundColor: "#1e293b",
+                  },
+
+                  "&.active": {
+                    color: "#38bdf8",
+                    backgroundColor: "#0f172a",
+                    fontWeight: 600,
+                  },
+                }}
+              >Jobs</Button>
+              <Button component={NavLink} to="/applied"
+                sx={{
+                  color: "#e5e7eb",
+                  px: 2,
+                  borderRadius: "8px",
+
+                  "&:hover": {
+                    backgroundColor: "#1e293b",
+                  },
+
+                  "&.active": {
+                    color: "#38bdf8",
+                    backgroundColor: "#0f172a",
+                    fontWeight: 600,
+                  },
+                }}
+              >Applied</Button>
+              <Button onClick={handleLogout} color="error" variant="contained">
+                Logout
+              </Button>
+            </>
+          )}
+        </Box>
+
+        {/* MOBILE MENU BUTTON */}
+        <Box sx={{ display: { xs: "block", md: "none" } }}>
+          <Button onClick={handleMenuOpen} sx={{ color: "#fff" }}>
+            ☰
+          </Button>
+
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleMenuClose}
+            PaperProps={{
+              sx: {
+                backgroundColor: "#020617",
+                color: "#e5e7eb",
+                minWidth: 160,
+              },
             }}
           >
-            <BsBriefcase size={25} />
-            <Typography sx={{ fontSize: "24px", fontWeight: 600 }}>
-              JobPortal
-            </Typography>
-          </Box>
-
-          {/* Search */}
-          <TextField
-            size="small"
-            placeholder="Search jobs..."
-            value={searchBar}
-            onChange={(e)=>setSearchBar(e.target.value)}
-            sx={{ background: "#fff", borderRadius: "6px", width: "280px" }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <Box sx={{ display: "flex", gap: "15px" }}>
             {!user ? (
               <>
-                <Button component={RouterLink} to="/login"
-                  variant="outlined"
-                  sx={{ color: "#fff", borderColor: "#2563eb" }}
+                <MenuItem
+                  component={NavLink}
+                  to="/login"
+                  onClick={handleMenuClose}
                 >
                   Login
-                </Button>
-                <Button component={RouterLink} to="/signup"
-                   variant="contained"
-                   sx={{ background: "#2563eb" }}
+                </MenuItem>
+                <MenuItem
+                  component={NavLink}
+                  to="/signup"
+                  onClick={handleMenuClose}
                 >
                   Signup
-                </Button>
+                </MenuItem>
               </>
             ) : (
               <>
-                <Button component={RouterLink} to="/jobs" sx={{ color: "#fff" }}>
+                <MenuItem component={NavLink} to="/" onClick={handleMenuClose}
+                  sx={{
+                  color: "#e5e7eb",
+                  px: 2,
+                  borderRadius: "8px",
+
+                  "&:hover": {
+                    backgroundColor: "#1e293b",
+                  },
+
+                  "&.active": {
+                    color: "#38bdf8",
+                    backgroundColor: "#0f172a",
+                    fontWeight: 600,
+                  },
+                }}
+                >
+                  Home
+                </MenuItem>
+                <MenuItem component={NavLink} to="/jobs" onClick={handleMenuClose}
+                  sx={{
+                  color: "#e5e7eb",
+                  px: 2,
+                  borderRadius: "8px",
+
+                  "&:hover": {
+                    backgroundColor: "#1e293b",
+                  },
+
+                  "&.active": {
+                    color: "#38bdf8",
+                    backgroundColor: "#0f172a",
+                    fontWeight: 600,
+                  },
+                }}
+                >
                   Jobs
-                </Button>
-                <Button component={RouterLink} to="/applied" sx={{ color: "#fff" }}>
+                </MenuItem>
+                <MenuItem
+                  component={NavLink}
+                  to="/applied"
+                  onClick={handleMenuClose}
+                  sx={{
+                  color: "#e5e7eb",
+                  px: 2,
+                  borderRadius: "8px",
+
+                  "&:hover": {
+                    backgroundColor: "#1e293b",
+                  },
+
+                  "&.active": {
+                    color: "#38bdf8",
+                    backgroundColor: "#0f172a",
+                    fontWeight: 600,
+                  },
+                }}
+                >
                   Applied
-                </Button>
-                <Button onClick={handleLogout} color="error" variant="contained">
+                </MenuItem>
+                <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
                   Logout
-                </Button>
+                </MenuItem>
               </>
             )}
-          </Box>
-        </Toolbar>
-      </AppBar>
-    </Box>
+          </Menu>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }
