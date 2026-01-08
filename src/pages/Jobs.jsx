@@ -3,6 +3,7 @@ import {
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Container,
   Grid,
   Typography,
@@ -16,6 +17,7 @@ import { AuthContext } from "../context/AuthContext";
 export default function Jobs() {
   const [jobs, setJobs] = useState([]);
   const [appliedJobs, setAppliedJobs] = useState([]);
+  const[loading,setLoading] = useState(true)
   const navigate = useNavigate();
 
   const{searchBar} = useContext(AuthContext)
@@ -26,6 +28,7 @@ export default function Jobs() {
         headers: { Authorization: "byqZEYiNcf0n5qCM" },
       })
       .then((res) => setJobs(res.data.Data))
+      .finally(()=>setLoading(false))
       .catch(() => toast.error("Failed to load jobs"));
   }, []);
 
@@ -92,6 +95,26 @@ export default function Jobs() {
     jobSearch.title.toLowerCase().includes(searchBar.toLowerCase()) ||
     jobSearch.location.toLowerCase().includes(searchBar.toLowerCase())
   )
+
+  if (loading)
+      return (
+        <Box
+          sx={{
+            minHeight: "100vh",
+            background: "#020617",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <CircularProgress />
+          <Typography sx={{ mt: 2, color: "#94a3b8" }}>
+            Loading Jobs...
+          </Typography>
+        </Box>
+      );
+  
   return (
     <Box sx={{ minHeight: "100vh", background: "#020617", py: 6 }}>
       <Typography
