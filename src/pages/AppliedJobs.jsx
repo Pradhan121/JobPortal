@@ -2,6 +2,7 @@ import {
   Box,
   Card,
   CardContent,
+  CircularProgress,
   Container,
   Grid,
   Typography,
@@ -13,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 export default function AppliedJobs() {
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [jobs, setJobs] = useState([]);
+  const[loading,setLoading] = useState(true)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,7 +36,8 @@ export default function AppliedJobs() {
         (item) => String(item.userId) === String(userId)
         )
         setAppliedJobs(filtered);
-      });
+      })
+      .finally(()=>setLoading(false))
   }, []);
 
   useEffect(() => {
@@ -53,6 +56,25 @@ export default function AppliedJobs() {
   const getJobDetails = (jobId) => {
     return jobs.find((job) => job._id === jobId);
   };
+
+  if (loading)
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          background: "#020617",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+        <Typography sx={{ mt: 2, color: "#94a3b8" }}>
+          Loading Applied Jobs...
+        </Typography>
+      </Box>
+    );
 
   return (
     <Box
