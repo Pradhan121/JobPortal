@@ -107,6 +107,7 @@ export default function AppliedJobs() {
 
           {appliedJobs.map((item) => {
             const jobDetails = getJobDetails(item.jobId);
+            const status = item.status?.toLowerCase() || "pending";
             return (
               <Grid size={{ lg: 4, sm: 6, md: 4, xs: 12 }} key={item._id}>
                 <Card
@@ -148,7 +149,7 @@ export default function AppliedJobs() {
                             : "#facc15",
                       }}
                     >
-                      Status: {item.status}
+                      Status: {status.toUpperCase()}
                     </Typography>
                   </CardContent>
                 </Card>

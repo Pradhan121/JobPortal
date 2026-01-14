@@ -57,7 +57,7 @@ export default function Add_EditJob() {
       jobType: Yup.string().required("Enter Job Type"),
       postedAt: Yup.string().required("Enter Post Date"),
     }),
-    onSubmit: (values) => {
+    onSubmit: (values,{resetForm}) => {
       const formData = new FormData();
       formData.append("id", values.id);
       formData.append("title", values.title);
@@ -128,9 +128,32 @@ export default function Add_EditJob() {
         postedAt: jobData.postedAt,
       });
     }
+    else {
+      setEdit(null);
+      setJob({
+         id: "", 
+         title: "", 
+         company: "", 
+         location: "", 
+         experience: "", 
+         jobType: "", 
+         postedAt: ""
+      });
+    }
   }, []);
 
-  const handleClose = () => {
+    const handleClose = () => {
+    localStorage.removeItem("editJobData");
+    setEdit(null);
+    setJob({
+       id: "",  
+       title: "", 
+       company: "", 
+       location: "", 
+       experience: "", 
+       jobType: "", 
+       postedAt: ""
+    });
     form.resetForm();
     setOpen(false);
     navigate("/admin/dashboard");
@@ -145,7 +168,8 @@ export default function Add_EditJob() {
           </DialogTitle>
 
           <DialogContent sx={{ overflow: "hidden" }}>
-            <Box component="form" onSubmit={form.handleSubmit}>
+            <Box component="form" onSubmit={form.handleSubmit} 
+              sx={{display:'flex',flexDirection:'column',gap:'16px'}}>
               <TextField
                 fullWidth
                 label="Job Id"

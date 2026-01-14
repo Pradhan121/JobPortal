@@ -6,21 +6,3 @@
 body{
   margin: 0;
 }
-/* 
-              sx={{
-                  color: "#e5e7eb",
-                  px: 2,
-                  borderRadius: "8px",
-
-                  "&:hover": {
-                    backgroundColor: "#1e293b",
-                  },
-
-                  "&.active": {
-                    color: "#38bdf8",
-                    backgroundColor: "#0f172a",
-                    fontWeight: 600,
-                  },
-                }}      
-                      
-                */

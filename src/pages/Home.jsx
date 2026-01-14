@@ -32,9 +32,10 @@ export default function Home() {
   }, []);
 
   const navigate = useNavigate();
+
   const handleClick = () => {
-    toast.error("Please Login first");
-    navigate("/login");
+    toast.warning('Here you can apply jobs')
+    navigate("/jobs");
   };
 
   const handleExplore = () => {
