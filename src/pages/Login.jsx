@@ -1,7 +1,7 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { AuthContext } from "../context/AuthContext";
 
@@ -145,7 +145,7 @@ export default function Login() {
             display: "block",
           }}
         >
-          Don’t have an account?{" "}
+          Don’t have an account?
           <span style={{ color: "#2563eb", cursor: "pointer" }}>Sign up</span>
         </Link>
       </Box>

@@ -7,6 +7,11 @@ import {
   Container,
   Grid,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from "@mui/material";
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
@@ -17,113 +22,130 @@ import { AuthContext } from "../context/AuthContext";
 export default function Jobs() {
   const [jobs, setJobs] = useState([]);
   const [appliedJobs, setAppliedJobs] = useState([]);
-  const[loading,setLoading] = useState(true)
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
-  const{searchBar} = useContext(AuthContext)
-  /* ---------------- GET ALL JOBS ---------------- */
+  // 🔹 Apply Dialog States
+  const [openApply, setOpenApply] = useState(false);
+  const [jobId, setJobId] = useState(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [resume, setResume] = useState(null);
+
+  const navigate = useNavigate();
+  const { searchBar } = useContext(AuthContext);
+
+  /* ---------------- GET JOBS ---------------- */
   useEffect(() => {
     axios
       .get("https://generateapi.techsnack.online/api/jobs", {
         headers: { Authorization: "byqZEYiNcf0n5qCM" },
       })
       .then((res) => setJobs(res.data.Data))
-      .finally(()=>setLoading(false))
-      .catch(() => toast.error("Failed to load jobs"));
+      .catch(() => toast.error("Failed to load jobs"))
+      .finally(() => setLoading(false));
   }, []);
 
-  /* ---------------- FETCH APPLIED JOBS (if logged in) ---------------- */
+  /* ---------------- FETCH APPLIED JOBS ---------------- */
   const fetchAppliedJobs = () => {
     const userId = localStorage.getItem("userId");
     if (!userId) return;
 
     axios
-      .get("https://generateapi.techsnack.online/api/appliedJobs", {
+      .get("https://generateapi.techsnack.online/api/applyJobs", {
         headers: { Authorization: "byqZEYiNcf0n5qCM" },
       })
       .then((res) => {
-        const applied = res.data.Data
-          .filter((item) => item.userId === userId)
-          .map((item) => String(item.jobId));
-
+        const applied = res.data.Data.filter(
+          (item) => String(item.userId) === String(userId),
+        ).map((item) => String(item.jobId));
         setAppliedJobs(applied);
-      })
-      .catch(() => console.log("Applied jobs fetch failed"));
+      });
   };
 
   useEffect(() => {
     fetchAppliedJobs();
   }, []);
 
-  /* ---------------- APPLY JOB ---------------- */
-  const handleApply = (jobId) => {
+  /* ---------------- APPLY BUTTON CLICK ---------------- */
+  const openApplyDialog = (jobId) => {
     const userId = localStorage.getItem("userId");
-
-    // 🔐 Not logged in
     if (!userId) {
       toast.error("Please login to apply");
       navigate("/login");
       return;
     }
+    setJobId(jobId);
+    setOpenApply(true);
+  };
+
+  /* ---------------- FINAL APPLY ---------------- */
+  const handleFinalApply = () => {
+    if (!name || !email || !resume) {
+      toast.error("Please enter name & upload resume");
+      return;
+    }
+
+    const userId = localStorage.getItem("userId");
+    const formData = new FormData();
+
+    formData.append("jobId", jobId);
+    formData.append("userId", userId);
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("resume", resume);
+    formData.append("appliedAt", new Date().toISOString().split("T")[0]);
+    formData.append("status", "pending");
 
     axios
-      .post(
-        "https://generateapi.techsnack.online/api/appliedJobs",
-        {
-          jobId,
-          userId,
-          appliedAt: new Date().toISOString().split("T")[0],
-          status: "pending",
+      .post("https://generateapi.techsnack.online/api/applyJobs", formData, {
+        headers: {
+          Authorization: "byqZEYiNcf0n5qCM",
+          "Content-Type": "multipart/form-data",
         },
-        {
-          headers: { Authorization: "byqZEYiNcf0n5qCM" },
-        }
-      )
+      })
       .then(() => {
         toast.success("Applied Successfully");
+        setOpenApply(false);
+        setName("");
+        setEmail("");
+        setResume(null);
         fetchAppliedJobs();
       })
+
       .catch(() => toast.error("Already applied"));
   };
 
-  /* ---------------- CHECK APPLIED ---------------- */
-  const isApplied = (jobId) =>{
-    return appliedJobs.includes(String(jobId));
-  }
-    
-  const filterSearch = jobs.filter((jobSearch)=>
-    jobSearch.title.toLowerCase().includes(searchBar.toLowerCase()) ||
-    jobSearch.location.toLowerCase().includes(searchBar.toLowerCase())
-  )
+  const isApplied = (jobId) => appliedJobs.includes(String(jobId));
+
+  const filterSearch = jobs.filter(
+    (job) =>
+      job.title.toLowerCase().includes(searchBar.toLowerCase()) ||
+      job.location.toLowerCase().includes(searchBar.toLowerCase()),
+  );
 
   if (loading)
-      return (
-        <Box
-          sx={{
-            minHeight: "100vh",
-            background: "#020617",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <CircularProgress />
-          <Typography sx={{ mt: 2, color: "#94a3b8" }}>
-            Loading Jobs...
-          </Typography>
-        </Box>
-      );
-  
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          background: "#020617",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+
   return (
-    <Box sx={{ minHeight: "100vh", background: "#020617", py: 6 }}>
+    <Box sx={{ minHeight: "100vh", background: "#020617", py: 6, mt:'50px'}}>
       <Typography
         sx={{
           color: "#fff",
-          fontSize: "32px",
+          fontSize: 32,
           fontWeight: 700,
           textAlign: "center",
-          mt: 4,
         }}
       >
         Available Jobs
@@ -132,56 +154,36 @@ export default function Jobs() {
       <Container>
         <Grid container spacing={3}>
           {filterSearch.map((job) => (
-            <Grid key={job._id} size={{ lg: 4, md: 4, sm: 6, xs: 12 }}>
+            <Grid key={job._id} size={{ md: 4, sm: 6, xs: 12 }}>
               <Card
                 sx={{
                   background: "#020617",
                   border: "1px solid #1e293b",
-                  borderRadius: "12px",
-                  transition: "0.3s",
-                  mt:4,
-                  "&:hover": {
-                    transform: "translateY(-6px)",
-                    borderColor: "#2563eb",
-                  },
+                  mt: 4,
                 }}
               >
                 <CardContent>
-                  <Typography sx={{ color: "#fff", fontSize: 20, mb: 1 }}>
+                  <Typography sx={{ color: "#fff", fontSize: 20 }}>
                     {job.title}
                   </Typography>
-
                   <Typography sx={{ color: "#94a3b8" }}>
                     {job.company} • {job.location}
                   </Typography>
-
                   <Typography sx={{ color: "#cbd5e1", mt: 1 }}>
-                    Experience: {job.experience}
-                  </Typography>
-
-                  <Typography sx={{ color: "#cbd5e1" }}>
                     Job Type: {job.jobType}
                   </Typography>
-                  <Typography
-                      sx={{ color: "#64748b", fontSize: "14px", mt: 1 }}
-                    >
-                      Posted on: {job.postedAt?.split("T")[0]}
-                    </Typography>
+
                   <Button
                     fullWidth
                     disabled={isApplied(job._id)}
-                    onClick={() => handleApply(job._id)}
+                    onClick={() => openApplyDialog(job._id)}
                     sx={{
                       mt: 2,
-                      background: isApplied(job._id)
-                        ? "#16a34a"
-                        : "#2563eb",
+                      background: isApplied(job._id) ? "#16a34a" : "#2563eb",
                       color: "#fff",
                       fontWeight: 600,
                       "&:hover": {
-                        background: isApplied(job._id)
-                          ? "#16a34a"
-                          : "#1d4ed8",
+                        background: isApplied(job._id) ? "#16a34a" : "#1d4ed8",
                       },
                       "&.Mui-disabled": {
                         background: "#16a34a",
@@ -198,6 +200,51 @@ export default function Jobs() {
           ))}
         </Grid>
       </Container>
+
+      {/* 🔥 APPLY DIALOG */}
+      <Dialog open={openApply} onClose={() => setOpenApply(false)} fullWidth>
+        <DialogTitle sx={{ textAlign: "center" }}>Apply for Job</DialogTitle>
+
+        <DialogContent
+          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+        >
+          <TextField
+            fullWidth
+            placeholder="FullName"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <TextField
+            fullWidth
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <Button variant="outlined" component="label">
+            Upload Resume (PDF)
+            <input
+              hidden
+              type="file"
+              accept=".pdf"
+              onChange={(e) => setResume(e.target.files[0])}
+            />
+          </Button>
+
+          {resume && (
+            <Typography sx={{ color: "green", fontSize: 14 }}>
+              {resume.name}
+            </Typography>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenApply(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleFinalApply}>
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

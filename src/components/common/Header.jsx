@@ -11,16 +11,21 @@ import {
 } from "@mui/material";
 import { BsBriefcase } from "react-icons/bs";
 import SearchIcon from "@mui/icons-material/Search";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 
 export default function Header() {
   const { user, logout, searchBar, setSearchBar } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation()
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  if (location.pathname === "/login" || location.pathname === "/signup") {
+    return null;
+  }
 
   const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);

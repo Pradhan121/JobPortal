@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  MenuItem,
   TextField,
 } from "@mui/material";
 import { Box, Container } from "@mui/system";
@@ -44,6 +45,8 @@ export default function Add_EditJob() {
       .catch((err) => console.log(err));
   };
 
+  const today = new Date().toISOString().split("T")[0];
+
   // 🔹 FORMIK
   const form = useFormik({
     initialValues: job,
@@ -57,7 +60,7 @@ export default function Add_EditJob() {
       jobType: Yup.string().required("Enter Job Type"),
       postedAt: Yup.string().required("Enter Post Date"),
     }),
-    onSubmit: (values,{resetForm}) => {
+    onSubmit: (values, { resetForm }) => {
       const formData = new FormData();
       formData.append("id", values.id);
       formData.append("title", values.title);
@@ -81,7 +84,7 @@ export default function Add_EditJob() {
                 Authorization: "byqZEYiNcf0n5qCM",
                 "Content-Type": "multipart/form-data",
               },
-            }
+            },
           )
           .then(() => {
             toast.success("Job updated successfully");
@@ -124,35 +127,41 @@ export default function Add_EditJob() {
         company: jobData.company,
         location: jobData.location,
         experience: jobData.experience,
-        jobType: jobData.jobType,
+        jobType:
+        jobData.jobType === "FullTime"
+          ? "Full Time"
+          : jobData.jobType === "PartTime"
+          ? "Part Time"
+          : jobData.jobType === "Internship"
+          ? "Internship"
+          : "",
         postedAt: jobData.postedAt,
       });
-    }
-    else {
+    } else {
       setEdit(null);
       setJob({
-         id: "", 
-         title: "", 
-         company: "", 
-         location: "", 
-         experience: "", 
-         jobType: "", 
-         postedAt: ""
+        id: "",
+        title: "",
+        company: "",
+        location: "",
+        experience: "",
+        jobType: "",
+        postedAt: "",
       });
     }
   }, []);
 
-    const handleClose = () => {
+  const handleClose = () => {
     localStorage.removeItem("editJobData");
     setEdit(null);
     setJob({
-       id: "",  
-       title: "", 
-       company: "", 
-       location: "", 
-       experience: "", 
-       jobType: "", 
-       postedAt: ""
+      id: "",
+      title: "",
+      company: "",
+      location: "",
+      experience: "",
+      jobType: "",
+      postedAt: "",
     });
     form.resetForm();
     setOpen(false);
@@ -168,20 +177,23 @@ export default function Add_EditJob() {
           </DialogTitle>
 
           <DialogContent sx={{ overflow: "hidden" }}>
-            <Box component="form" onSubmit={form.handleSubmit} 
-              sx={{display:'flex',flexDirection:'column',gap:'16px'}}>
+            <Box
+              component="form"
+              onSubmit={form.handleSubmit}
+              sx={{ display: "flex", flexDirection: "column", gap: "16px" }}
+            >
               <TextField
                 fullWidth
-                label="Job Id"
+                placeholder="Job Id"
                 name="id"
                 value={form.values.id}
                 onChange={form.handleChange}
-                disabled={Boolean(edit)} 
+                disabled={Boolean(edit)}
               />
 
               <TextField
                 fullWidth
-                label="Job Title"
+                placeholder="Job Title"
                 name="title"
                 value={form.values.title}
                 onChange={form.handleChange}
@@ -197,7 +209,7 @@ export default function Add_EditJob() {
 
               <TextField
                 fullWidth
-                label="Company"
+                placeholder="Company"
                 name="company"
                 value={form.values.company}
                 onChange={form.handleChange}
@@ -213,7 +225,7 @@ export default function Add_EditJob() {
 
               <TextField
                 fullWidth
-                label="Location"
+                placeholder="Location"
                 name="location"
                 value={form.values.location}
                 onChange={form.handleChange}
@@ -228,32 +240,35 @@ export default function Add_EditJob() {
               />
 
               <TextField
-                fullWidth
-                label="Experience"
+                select
                 name="experience"
                 value={form.values.experience}
                 onChange={form.handleChange}
-                sx={{ mb: 2 }}
-                slotProps={{
-                  inputLabel: {
-                    shrink: true,
-                  },
-                }}
-              />
+                SelectProps={{ displayEmpty: true }}
+              >
+                <MenuItem value="" disabled>
+                  Select Experience
+                </MenuItem>
+                <MenuItem value="0-3 years">0-3 years</MenuItem>
+                <MenuItem value="1+ years">1+ years</MenuItem>
+                <MenuItem value="2-5 years">2-5 years</MenuItem>
+                <MenuItem value="5+ years">5+ years</MenuItem>
+              </TextField>
 
               <TextField
-                fullWidth
-                label="Job Type"
+                select
                 name="jobType"
                 value={form.values.jobType}
                 onChange={form.handleChange}
-                sx={{ mb: 2 }}
-                slotProps={{
-                  inputLabel: {
-                    shrink: true,
-                  },
-                }}
-              />
+                SelectProps={{ displayEmpty: true }}
+              >
+                <MenuItem value="" disabled>
+                  Select Job Type
+                </MenuItem>
+                <MenuItem value="Full Time">FullTime</MenuItem>
+                <MenuItem value="Part Time">PartTime</MenuItem>
+                <MenuItem value="Internship">Internship</MenuItem>
+              </TextField>
 
               <TextField
                 fullWidth
@@ -266,6 +281,9 @@ export default function Add_EditJob() {
                   inputLabel: {
                     shrink: true,
                   },
+                }}
+                inputProps={{
+                  min: today, // past dates disabled
                 }}
               />
 

@@ -26,7 +26,7 @@ export default function AppliedJobs() {
     }
 
     axios
-      .get("https://generateapi.techsnack.online/api/appliedJobs", {
+      .get("https://generateapi.techsnack.online/api/applyJobs", {
         headers: {
           Authorization: "byqZEYiNcf0n5qCM",
         },
@@ -133,7 +133,7 @@ export default function AppliedJobs() {
                     </Typography>
 
                     <Typography sx={{ color: "#cbd5e1", fontSize: "14px" }}>
-                      Applied On: {item.appliedAt}
+                      Applied On: {item.appliedAt.split('T')[0]}
                     </Typography>
 
                     <Typography
